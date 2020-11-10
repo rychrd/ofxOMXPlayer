@@ -96,7 +96,7 @@ void ofxOMXPlayerEngine::clear()
     m_has_audio = false;
     //currentPlaybackSpeed = 0.0;
     hasNewFrame = false;
-    listener = NULL;
+    listener = nullptr;
     isOpen = false;
     duration = 0;
     totalNumFrames = 0;
