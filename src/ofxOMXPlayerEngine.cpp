@@ -73,7 +73,7 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
     speeds.push_back(createSpeed(0.50));
     speeds.push_back(createSpeed(0.975));
     speeds.push_back(createSpeed(1.0));
-    speeds.push_back(createSpeed(1.125));
+    speeds.push_back(createSpeed(1.25));
     speeds.push_back(createSpeed(2.0));
     speeds.push_back(createSpeed(4.0));
     
@@ -96,7 +96,7 @@ void ofxOMXPlayerEngine::clear()
     m_has_audio = false;
     //currentPlaybackSpeed = 0.0;
     hasNewFrame = false;
-    listener = nullptr;
+    listener = NULL;
     isOpen = false;
     duration = 0;
     totalNumFrames = 0;
@@ -690,12 +690,19 @@ void ofxOMXPlayerEngine::threadedFunction()
                     seek_pos = (pts ? pts / DVD_TIME_BASE : last_seek_pos) + m_incr;
                     last_seek_pos = seek_pos;
                     
-                    seek_pos *= 1000.0;
+		    ofLog(OF_LOG_NOTICE, "pts: %f\nseek_pos: %f", pts, seek_pos);
+                    
+		    seek_pos *= 1000.0;
                     
                     if(m_omx_reader.SeekTime((int)seek_pos, m_incr < 0.0f, &startpts))
                     {
                         unsigned t = (unsigned)(startpts*1e-6);
                         auto dur = m_omx_reader.GetStreamLength() / 1000;
+			if(t > dur)						// rm check if seeking beyond stream end
+			{
+			    ofLog(OF_LOG_NOTICE, "seek time exceeds duration... t=%u dur=%u", t, dur);
+			    continue; //doExit();
+			}
                         ofLog(OF_LOG_NOTICE, "m_omx_reader Seek\n%02d:%02d:%02d / %02d:%02d:%02d",
                               (t/3600), (t/60)%60, t%60, (dur/3600), (dur/60)%60, dur%60);
                         FlushStreams(startpts);
@@ -731,7 +738,12 @@ void ofxOMXPlayerEngine::threadedFunction()
                 pts = omxClock.OMXMediaTime();
                 seek_pos = (pts / DVD_TIME_BASE);
                 
-                seek_pos *= 1000.0;
+		if(seek_pos > m_omx_reader.GetStreamLength())
+		{
+		  ofLog(OF_LOG_NOTICE, "inside TRICKPLAY: seeking beyond length ...%d", seek_pos);
+		}
+
+		seek_pos *= 1000.0;
                 if(m_omx_reader.SeekTime((int)seek_pos, omxClock.OMXPlaySpeed() < 0, &startpts))
                 {
                     //FlushStreams(DVD_NOPTS_VALUE);
@@ -1392,9 +1404,8 @@ void ofxOMXPlayerEngine::doExit()
 
 void ofxOMXPlayerEngine::close(bool clearTextures)//default clearTextures = false
 {
-    ofRemoveListener(ofEvents().update, this, &ofxOMXPlayerEngine::onUpdate);
-    listener = nullptr;
     lock();
+    //ofRemoveListener(ofEvents().update, this, &ofxOMXPlayerEngine::onUpdate);
     stopThread();
     //
     
