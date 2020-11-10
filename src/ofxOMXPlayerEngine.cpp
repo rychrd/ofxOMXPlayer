@@ -1404,6 +1404,8 @@ void ofxOMXPlayerEngine::doExit()
 
 void ofxOMXPlayerEngine::close(bool clearTextures)//default clearTextures = false
 {
+    ofRemoveListener(ofEvents().update, this, &ofxOMXPlayerEngine::onUpdate);
+    listener = nullptr;
     lock();
     //ofRemoveListener(ofEvents().update, this, &ofxOMXPlayerEngine::onUpdate);
     stopThread();
