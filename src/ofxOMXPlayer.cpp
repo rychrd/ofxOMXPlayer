@@ -203,6 +203,11 @@ bool ofxOMXPlayer::isFrameNew()
     return engine.hasNewFrame;
 }
 
+bool ofxOMXPlayer::isSubmitEOS()
+{
+    return engine.m_player_video.m_decoder->SubmittedEOS();
+}
+
 COMXStreamInfo&  ofxOMXPlayer::getVideoStreamInfo()
 {
     return engine.m_config_video.hints;

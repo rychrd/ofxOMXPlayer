@@ -65,6 +65,7 @@ public:
     bool isLoopingEnabled();
     bool isTextureEnabled();
     bool isFrameNew();
+    bool isSubmitEOS();
     COMXStreamInfo&  getVideoStreamInfo();
     COMXStreamInfo&  getAudioStreamInfo();
     static string getRandomVideo(string path);
